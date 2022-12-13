@@ -1,0 +1,28 @@
+spring:
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: root
+        url: jdbc:mysql://localhost:3306/ecomapp
+        username: root
+    jackson:
+        deserialization:
+            fail-on-unknown-properties: true
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQL55Dialect
+                format_sql: true
+        show-sql: true
+    main:
+        allow-circular-references: true
+    servlet:
+        multipart:
+            enabled: true
+            file-size-threshold: 5KB
+            max-file-size: 10MB
+ 
+project:
+    name: /images
+                     

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ecom.response.ResponseHandler;
+import com.ecom.utills.Messages;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -29,7 +30,7 @@ public class GlobalExceptionHandler {
 			errors.put(field, errorMsg);
 		});
 		
-		return ResponseHandler.errorResponseBuilder(MOBILE_NUMBER_EXCEPTION, HttpStatus.BAD_REQUEST, errors);
+		return ResponseHandler.errorResponseBuilder(Messages.INVALID_FIELDS, HttpStatus.BAD_REQUEST, errors);
 	}
 	
 

@@ -1,6 +1,7 @@
 package com.ecom.services.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -82,8 +83,9 @@ public class OrderServicesImpl<T> implements OrderServices<T> {
 		log.info("OrderServicesImpl::updateOrder == START");
 
 		log.info("OrderServicesImpl::updateOrder::geting order with id = {}", oid);
-		Order order = orderRepository.findById(oid)
-				.orElseThrow(() -> new RuntimeException("No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   order found with Order_id " + oid));
+		Order order = orderRepository.findById(oid).orElseThrow(() -> new RuntimeException(
+				"No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   order found with Order_id "
+						+ oid));
 		log.info("OrderServicesImpl::updateOrder::order return by id = {}", order);
 
 		order.setStatus(orderDto.getStatus());
@@ -109,13 +111,22 @@ public class OrderServicesImpl<T> implements OrderServices<T> {
 		for (OrderItem item : order.getOrderItems()) {
 			orderItemRepository.delete(item);
 		}
-		
-		log.info("OrderServicesImpl::deleteOrder::deleting order with id = {}",oid);
+
+		log.info("OrderServicesImpl::deleteOrder::deleting order with id = {}", oid);
 		orderRepository.delete(order);
 
 		log.info("OrderServicesImpl::deleteOrder == END");
 
 		return null;
+	}
+
+	@Override
+	public T getAllOrders() {
+		List<Order> all = orderRepository.findAll();
+
+		List<OrderDto> list = all.stream().map(item -> modelMapper.map(item, OrderDto.class))
+				.collect(Collectors.toList());
+		return (T) list;
 	}
 
 }

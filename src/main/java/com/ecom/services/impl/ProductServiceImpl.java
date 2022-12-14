@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 		List<Product> allProducts = findAll.getContent();
 		List<ProductDto> list = allProducts.stream().map(item -> modelMapper.map(item, ProductDto.class))
 				.collect(Collectors.toList());
-		
+
 		ProductRespone productRespone = new ProductRespone();
 		productRespone.setProducts(list);
 		productRespone.setPageNumber(findAll.getNumber());
@@ -62,7 +62,26 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public List<ProductDto> searchProduct(String key) {
 		List<Product> products = productRepository.findByNameContaining(key);
-		return products.stream().map(pro->modelMapper.map(pro, ProductDto.class)).collect(Collectors.toList());
+		return products.stream().map(pro -> modelMapper.map(pro, ProductDto.class)).collect(Collectors.toList());
+	}
+
+	@Override
+	public ProductDto updateProduct(Integer id, ProductDto productDto) {
+		Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+
+		product.setName(productDto.getName());
+		product.setPrice(productDto.getPrice());
+		product.setDescription(productDto.getDescription());
+		product.setQuantity(productDto.getQuantity());
+
+		product = productRepository.save(product);
+		return modelMapper.map(product, productDto.getClass());
+	}
+
+	@Override
+	public ProductDto getProductById(Integer id) {
+		Product product = productRepository.findById(id).orElseThrow(()-> new RuntimeException("No product found"));
+		return modelMapper.map(product, ProductDto.class);
 	}
 
 }

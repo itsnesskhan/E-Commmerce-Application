@@ -185,7 +185,7 @@ public class UserServiesImpl implements UserServices {
 		User user = userRepository.findById(addressDto.getUser().getUid())
 				.orElseThrow(() -> new RuntimeException("no user found"));
 
-//		Address address = addressRepository.findByUser(user);
+//		Address address = addressRepository.findByUserUid(addressDto.getUser().getUid());
 //		if (address!=null) {
 //			throw new RuntimeException("User already have a address");
 //		}

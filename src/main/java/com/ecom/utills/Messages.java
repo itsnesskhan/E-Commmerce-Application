@@ -8,6 +8,8 @@ public class Messages {
 	
 	public static final String ALL_PRODUCTS_MSG = "All products are here";
 	
+	public static final String ALL_ORDERS_MSG = "All orders are here";
+	
 	public static final String N0_MATCH_FOUND= "No product metch found";
 	
 	public static final String ORDER_CREATED= "Order created successfully!";

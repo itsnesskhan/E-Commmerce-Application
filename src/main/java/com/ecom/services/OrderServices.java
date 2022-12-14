@@ -11,4 +11,6 @@ public interface OrderServices<T> {
 	T updateOrder(Integer oid, OrderDto orderDto);
 	
 	T deleteOrder(Integer oid);
+	
+	T getAllOrders();
 }

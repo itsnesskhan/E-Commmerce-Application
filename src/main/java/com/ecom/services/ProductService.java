@@ -8,8 +8,12 @@ import com.ecom.helper.ProductRespone;
 public interface ProductService {
 
 	ProductDto addProduct(ProductDto productDto);
-	
+
 	ProductRespone getProducts(int pageNumber, int pageSize, String shortBy, String shortDirection);
-	
+
 	List<ProductDto> searchProduct(String key);
+
+	ProductDto updateProduct(Integer id, ProductDto productDto);
+
+	ProductDto getProductById(Integer id);
 }

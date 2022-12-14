@@ -7,7 +7,7 @@ import com.ecom.dtos.AddressDto;
 import com.ecom.dtos.UserDto;
 import com.ecom.model.UserRole;
 
-public interface UserServices {
+public interface UserServices<T> {
 
 	UserDto addUser(UserDto userDto, Set<UserRole> roles);
 
@@ -17,16 +17,9 @@ public interface UserServices {
 	
 	UserDto getUserById(Integer uid);
 
-	UserDto updateUser(UserDto userDto);
+	T updateUser(UserDto userDto);
 
 	void deleteUser(Integer uid);
 
-	AddressDto addAddress(AddressDto addressDto);
-
-	AddressDto getAddress(Integer aid);
-	
-	AddressDto updateAddress(AddressDto addressDto);
-	
-	void deleteAddress(Integer aid);
 
 }

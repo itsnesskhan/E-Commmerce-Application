@@ -39,7 +39,7 @@ import com.ecom.utills.Messages;
 
 @RestController
 @RequestMapping("/user")
-public class UserContoller {
+public class UserContoller<T> {
 
 	@Autowired
 	private UserServices userServices;
@@ -72,7 +72,7 @@ public class UserContoller {
 	}
 
 	@PutMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public ResponseEntity<?> updateUser(@RequestParam("user") String userString,
+	public T updateUser(@RequestParam("user") String userString,
 			@RequestPart(name = "profile", required = false) Optional<MultipartFile> file) {
 		
 		try {
@@ -96,26 +96,15 @@ public class UserContoller {
 				json.setProfileUrl(dowloadUrl);
 			}
 			
-			UserDto updateUser = userServices.updateUser(json);
+			T updateUser = (T) userServices.updateUser(json);
 			
-			return ResponseHandler.responseBuilder(Messages.USER_UPDATED, HttpStatus.OK, updateUser);
+			return (T) ResponseHandler.responseBuilder(Messages.USER_UPDATED, HttpStatus.OK, updateUser);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return ResponseHandler.responseBuilder(Messages.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR, Messages.SOMETHING_WENT_WRONG);
+		return (T) ResponseHandler.responseBuilder(Messages.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR, Messages.SOMETHING_WENT_WRONG);
 	}
 	
-//	@GetMapping(name = "/profile/{imageName}",produces = {MediaType.IMAGE_JPEG_VALUE})
-//	public void downloadImage(@PathVariable String imageName, HttpServletResponse httpServletResponse) throws IOException{
-//		
-//		String path = Constants.UPLOAD_DIR+File.separator+imageName;
-//		
-//		InputStream resource = fileServices.getResource(path, imageName);
-//		
-//		httpServletResponse.setContentType(MediaType.IMAGE_JPEG_VALUE);
-//		
-//		StreamUtils.copy(resource, httpServletResponse.getOutputStream());
-//	}
 	
 	
 	@GetMapping(value = "/profile/images/{imageName}", produces = { MediaType.IMAGE_JPEG_VALUE })
@@ -137,70 +126,10 @@ public class UserContoller {
 		return ResponseEntity.ok(Map.entry("User deleted successfully!", true));
 	}
 
-	@PostMapping("/address")
-	public ResponseEntity<AddressDto> addUserAddress(@RequestBody AddressDto addressDto) {
-		AddressDto addAddress = userServices.addAddress(addressDto);
-		return new ResponseEntity<AddressDto>(addressDto, HttpStatus.CREATED);
-	}
-
-	@GetMapping("/address/{aid}")
-	public ResponseEntity<AddressDto> getUserAddress(@PathVariable("aid") Integer aid) {
-		AddressDto address = userServices.getAddress(aid);
-		return ResponseEntity.ok(address);
-	}
-
-	@DeleteMapping("/address/{aid}")
-	public ResponseEntity<?> deleteUserAddress(@PathVariable("aid") Integer aid) {
-		userServices.deleteAddress(aid);
-		return ResponseEntity.ok(Map.entry("Address deleted Successfully", true));
-	}
-
-	@PutMapping("/address")
-	public ResponseEntity<AddressDto> updateUserAddress(@RequestBody AddressDto addressDto) {
-		AddressDto address = userServices.updateAddress(addressDto);
-		return ResponseEntity.ok(address);
-	}
+	
 	
 	
 	
 
-//	public static void main(String[] args) {
-//		String string = "0000000";
-//
-//		if (string.matches("                         ")) {
-//
-//			System.out.println("format varified");
-//		} else {
-//			System.out.println("not varifiled");
-//		}
-//
-//	}
-//
-//	ArrayList<Integer> commonElements(int A[], int B[], int C[], int n1, int n2, int n3) {
-////       HashSet<Integer> set1= (HashSet<Integer>) Arrays.stream(A).boxed().collect(Collectors.toSet());
-////       HashSet<Integer> set2 = (HashSet<Integer>) Arrays.stream(B).boxed().collect(Collectors.toSet());
-////       HashSet<Integer> set3 = (HashSet<Integer>) Arrays.stream(C).boxed().collect(Collectors.toSet());
-////      
-////       
-////       set1.retainAll(set2);
-//
-//		ArrayList<Integer> list = new ArrayList<>();
-//
-//		int x = 0, y = 0, z = 0;
-//		while (x < n1 && y < n2 && z < n3) {
-//
-//			if (A[x] == B[y] && B[y] == C[z]) {
-//				list.add(A[x]);
-//			} else if (A[x] < B[y]) {
-//				x++;
-//			} else if (B[y] < C[z]) {
-//				y++;
-//			} else {
-//				z++;
-//			}
-//		}
-//
-//		return list;
-//	}
 
 }

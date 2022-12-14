@@ -35,11 +35,16 @@ public class OrderController<T> {
 		
 	}
 	
-	
 	@GetMapping("/get/{id}")
 	public ResponseEntity<?> getOrder(@PathVariable Integer id){
 		T order = orderServices.getOrderBYId(id);
 		return ResponseHandler.responseBuilder(Messages.ORDER_DETAILS, HttpStatus.OK, order);
+	}
+	
+	@GetMapping("")
+	public ResponseEntity<?> getAllOrder(){
+		T order = orderServices.getAllOrders();
+		return ResponseHandler.responseBuilder(Messages.ALL_ORDERS_MSG, HttpStatus.OK, order);
 	}
 	
 	@PutMapping("/update/{id}")

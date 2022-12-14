@@ -1,6 +1,7 @@
 package com.ecom.services.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -19,14 +21,15 @@ import com.ecom.model.UserRole;
 import com.ecom.repository.AddressRepository;
 import com.ecom.repository.RoleRepository;
 import com.ecom.repository.UserRepository;
+import com.ecom.response.ResponseHandler;
 import com.ecom.services.UserServices;
-import com.ecom.utills.Constants;
+import com.ecom.utills.Messages;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class UserServiesImpl implements UserServices {
+public class UserServiesImpl<T> implements UserServices<T> {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -96,12 +99,11 @@ public class UserServiesImpl implements UserServices {
 	}
 
 	public User dtoToModel(UserDto userDto) {
-//		BeanUtils.copyProperties(userDto, User.class);
 		return modelMapper.map(userDto, User.class);
 	}
 
 	@Override
-	public UserDto updateUser(UserDto userDto) {
+	public T updateUser(UserDto userDto) {
 		LOGGER.info("UserservicesImpl::updateUser == START");
 
 		LOGGER.info("UserservicesImpl::updateUser::fetching User with Id = {}", userDto.getUid());
@@ -120,33 +122,42 @@ public class UserServiesImpl implements UserServices {
 		user = userRepository.save(user);
 
 		if (!userDto.getAddress().isEmpty() ) {
+			
 			for (AddressDto addressDto : userDto.getAddress()) {
-
+			
 				LOGGER.info("UserservicesImpl::updateUser::fetching address by user id = {}", userDto.getUid());
-				Address dbAddress = addressRepository.findByUserUid(userDto.getUid());
-
-				LOGGER.info("UserservicesImpl::updateUser::address by id = {}", dbAddress);
-
-				if (dbAddress != null) {
-					dbAddress.setStreet(addressDto.getStreet());
-					dbAddress.setCity(addressDto.getCity());
-					dbAddress.setState(addressDto.getState());
-
-					LOGGER.info("UserservicesImpl::updateUser::saving address objects");
-
-					Address address = addressRepository.save(dbAddress);
-					user.getAddress().add(address);
+				if (addressDto.getAid()!=null) {
+					Address dbAddress = addressRepository.findByUserUidAndAid(userDto.getUid(), addressDto.getAid());
 					
-				} else {
+					System.out.println(dbAddress+" my response");
+
+					LOGGER.info("UserservicesImpl::updateUser::address by id = {}", dbAddress);
+
+					if (dbAddress!=null) {
+					
+						dbAddress.setStreet(addressDto.getStreet());
+						dbAddress.setCity(addressDto.getCity());
+						dbAddress.setState(addressDto.getState());
+
+						LOGGER.info("UserservicesImpl::updateUser::saving address objects");
+
+						Address address = addressRepository.save(dbAddress);
+						user.getAddress().add(address);	
+					} 
+				}
+				else {
 					LOGGER.info("UserservicesImpl::updateUser::saving new address objects");
 
 					Address address = modelMapper.map(addressDto, Address.class);
 					address.setUser(user);
 					address = addressRepository.save(address);
 					user.getAddress().add(address);
+		
 				}
-
 			}
+			
+		}else {
+			return (T) ResponseHandler.errorResponseBuilder(Messages.SOMETHING_WENT_WRONG, HttpStatus.BAD_REQUEST);
 		}
 
 		LOGGER.info("UserservicesImpl::updateUser::updating user");
@@ -156,7 +167,7 @@ public class UserServiesImpl implements UserServices {
 
 		LOGGER.info("UserservicesImpl::updateUser == END");
 
-		return modelToDto(user);
+		return (T) modelToDto(user);
 	}
 
 	@Override
@@ -180,57 +191,7 @@ public class UserServiesImpl implements UserServices {
 		LOGGER.info("UserservicesImpl::deleteUser == END");
 	}
 
-	@Override
-	public AddressDto addAddress(AddressDto addressDto) {
-		User user = userRepository.findById(addressDto.getUser().getUid())
-				.orElseThrow(() -> new RuntimeException("no user found"));
-
-//		Address address = addressRepository.findByUserUid(addressDto.getUser().getUid());
-//		if (address!=null) {
-//			throw new RuntimeException("User already have a address");
-//		}
-
-		Address address = dtoToMode(addressDto);
-		address.setUser(user);
-		userRepository.save(user);
-		address = addressRepository.save(address);
-
-		return modelToDto(address);
-	}
-
-	@Override
-	public AddressDto getAddress(Integer aid) {
-		Address address = addressRepository.findById(aid)
-				.orElseThrow(() -> new ResourceAccessException("resource not found exception"));
-		return modelToDto(address);
-	}
-
-	public AddressDto modelToDto(Address address) {
-		return modelMapper.map(address, AddressDto.class);
-	}
-
-	private Address dtoToMode(AddressDto addressDto) {
-		return modelMapper.map(addressDto, Address.class);
-	}
-
-	@Override
-	public AddressDto updateAddress(AddressDto addressDto) {
-		Address address = addressRepository.findById(addressDto.getAid())
-				.orElseThrow(() -> new ResourceAccessException("No addresss with this id"));
-		address.setState(addressDto.getStreet());
-		address.setCity(addressDto.getCity());
-		address.setState(addressDto.getState());
-		address = addressRepository.save(address);
-		return modelToDto(address);
-	}
-
-	@Override
-	public void deleteAddress(Integer aid) {
-		Address address = addressRepository.findById(aid)
-				.orElseThrow(() -> new ResourceAccessException("Address not found"));
-		addressRepository.delete(address);
-
-	}
+	
 
 	@Override
 	public UserDto getUserById(Integer uid) {

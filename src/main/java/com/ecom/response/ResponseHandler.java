@@ -17,12 +17,11 @@ public class ResponseHandler {
 		return new ResponseEntity<>(response, httpStatus);
 	}
 
-	public static ResponseEntity<Object> errorResponseBuilder(String message, HttpStatus httpStatus, Object error) {
+	public static ResponseEntity<Object> errorResponseBuilder(String message, HttpStatus httpStatus) {
 
 		HashMap<String, Object> response = new HashMap<>();
 		response.put("Message", message);
 		response.put("HttpStatus", httpStatus);
-		response.put("Error", error);
 
 		return new ResponseEntity<>(response, httpStatus);
 	}

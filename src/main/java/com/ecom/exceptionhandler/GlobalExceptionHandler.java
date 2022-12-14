@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 			errors.put(field, errorMsg);
 		});
 		
-		return ResponseHandler.errorResponseBuilder(Messages.INVALID_FIELDS, HttpStatus.BAD_REQUEST, errors);
+		return ResponseHandler.responseBuilder(Messages.INVALID_FIELDS, HttpStatus.BAD_REQUEST, errors);
 	}
 	
 

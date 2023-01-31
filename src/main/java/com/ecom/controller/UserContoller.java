@@ -52,10 +52,7 @@ public class UserContoller<T> {
 
 	@PostMapping()
 	public ResponseEntity<UserDto> addUser(@Valid @RequestBody UserDto userDto) {
-		HashSet<UserRole> roles = new HashSet<>();
-		UserRole userRole = new UserRole(101, "NORMAL_USER");
-		roles.add(userRole);
-		UserDto user = this.userServices.addUser(userDto, roles);
+		UserDto user = this.userServices.addUser(userDto);
 		return new ResponseEntity<UserDto>(user, HttpStatus.CREATED);
 	}
 

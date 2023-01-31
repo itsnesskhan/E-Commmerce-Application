@@ -34,4 +34,12 @@ public class Constants {
 	
 	public static final String UPLOAD_DIR_2 = "static"+File.separator+"profile";
 	
+	public static final String USER_DOES_NOT_EXIST = "user does not exist";
+	
+	public static final String WRONG_PASSWORD="wrong password";
+	
+	public static final String AUTHORIZATION_HEADER_KEY = "Authorization";
+	
+	public static final String TOKEN_PREFIX = "Bearer";
+	public static final String AUTHORIZATION_REFERESH_KEY = "AuthorizationRefresh";
 }

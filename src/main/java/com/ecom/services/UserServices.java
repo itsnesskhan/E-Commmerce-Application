@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.ecom.dtos.AddressDto;
+import com.ecom.dtos.JwtRequest;
 import com.ecom.dtos.UserDto;
 import com.ecom.model.UserRole;
 
 public interface UserServices<T> {
 
-	UserDto addUser(UserDto userDto, Set<UserRole> roles);
+	UserDto addUser(UserDto userDto);
 
 	List<UserDto> getAllUsers();
 	
@@ -20,6 +21,8 @@ public interface UserServices<T> {
 	T updateUser(UserDto userDto);
 
 	void deleteUser(Integer uid);
+	
+	T loginUser(JwtRequest jwtRequest);
 
 
 }

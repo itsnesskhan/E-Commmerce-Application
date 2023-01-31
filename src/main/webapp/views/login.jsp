@@ -8,63 +8,46 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>${title}</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-
-<link rel="stylesheet" type="text/css"
-	href='<c:url value="/css/mystyle.css" />'>
 <link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-
-
-
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+	integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+	integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+	crossorigin="anonymous">
 </head>
 <body>
-	<jsp:include page="navbar.jsp" />
-	<div class="container">
+	<div class="container col-6 mx-auto my-5">
 		<div class="card">
 			<div class="top-div">
-				<h3>Welcome To My Site</h3>
-				<p>
-					New here? <a href="#">Create an account</a>
-				</p>
+
+			<h2 class="text-center p-2">Sign in here</h2>
 			</div>
 			<c:if test="${param.error != null }">
-				<div class="alert alert-danger">${param.error }</div>
+				<div class="alert alert-danger"><i>Invalid username or password!</i></div>
 			</c:if>
 			<c:if test="${param.logout != null}">
-				<div class="alert alert-success">${param.logout }</div>
+				<div class="alert alert-success"><i>You are successfully logged out! sign in again?</i></div>
 			</c:if>
 
-			<form action='<c:url value="/login" />' method="post">
-				<div class="input-text">
-					<input type="text" name="username" required="required"
-						autofocus="autofocus"> <span>Email</span> <i
-						class="fa fa-envelope-o"></i>
-				</div>
-				<div class="input-text">
-					<input type="password" name="password" required="required"
-						id="password_input"> <span>Password</span> <i
-						class="fa fa-eye-slash passcode"></i> <a href="#">Forgot your
-						password?</a>
-				</div>
-
-				<div class="remember">
-					<div>
-						<input type="checkbox" name="remember-me" id="r1"> <label
-							for="r1">Remember Me</label>
-					</div>
-				</div>
-				<div class="sign-in">
-					<button type="submit">Sign in</button>
-				</div>
-			</form>
+			     <div class="container">
+      <form:form class="form-signin" method="POST" action="/process-login">
+        <p>
+          <label for="username" class="sr-only">Username</label>
+          <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+        </p>
+        <p>
+          <label for="password" class="sr-only">Password</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+        </p>
+        <button class="btn btn-info m-1 text-center" type="submit">Sign in</button>
+      </form:form>
+</div>
+			
 
 		</div>
 
 	</div>
-	<script src='<c:url value="/js/mystyle.js" />'></script>
 </body>
 </html>

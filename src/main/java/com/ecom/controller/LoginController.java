@@ -10,4 +10,9 @@ public class LoginController {
 	public String showLoginForm() {
 		return "login";
 	}
+	
+	@GetMapping("/process_login")
+	public String home() {
+		return "index";
+	}
 }

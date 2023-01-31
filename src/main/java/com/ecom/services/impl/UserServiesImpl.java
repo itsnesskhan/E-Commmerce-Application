@@ -1,5 +1,7 @@
 package com.ecom.services.impl;
 
+import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,11 +11,19 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
+import com.ecom.config.JwtTokenUtil;
+import com.ecom.config.MyUserDetailsService;
 import com.ecom.dtos.AddressDto;
+import com.ecom.dtos.JwtRequest;
+import com.ecom.dtos.JwtResponse;
 import com.ecom.dtos.UserDto;
 import com.ecom.model.Address;
 import com.ecom.model.User;
@@ -23,6 +33,7 @@ import com.ecom.repository.RoleRepository;
 import com.ecom.repository.UserRepository;
 import com.ecom.response.ResponseHandler;
 import com.ecom.services.UserServices;
+import com.ecom.utills.Constants;
 import com.ecom.utills.Messages;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -33,41 +44,92 @@ public class UserServiesImpl<T> implements UserServices<T> {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private MyUserDetailsService myUserDetailsService;
+	
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
 	private ModelMapper modelMapper;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private RoleRepository roleRepository;
 
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Value("${spring.jwtConfig.token-validity}")
+	private long tokenTimeMiliSec;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiesImpl.class);
 
 	@Override
-	public UserDto addUser(UserDto userDto, Set<UserRole> roles) {
+	public T loginUser(JwtRequest jwtRequest) {
+		Optional<User> user = userRepository.findByEmail(jwtRequest.getUsername());
+		
+		
+		if (user.isEmpty()) {
+			return (T) ResponseHandler.errorResponseBuilder(Constants.USER_DOES_NOT_EXIST, HttpStatus.NOT_FOUND);
+		}
+		if (!passwordEncoder.matches(jwtRequest.getPassword(), user.get().getPassword())) {
+			return (T) ResponseHandler.errorResponseBuilder(Constants.WRONG_PASSWORD, HttpStatus.FORBIDDEN);
+		}
+		
+		try {
+			UserDetails userDetails = myUserDetailsService.loadUserByUsername(user.get().getUsername());
+			String token = jwtTokenUtil.generateToken(userDetails);
+			String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+			
+			JwtResponse jwtResponse = JwtResponse.builder()
+						.createdDate(LocalDate.now())
+						.authority(user.get().getRole().getName())
+						.email(user.get().getEmail())
+						.token(token)
+						.createdBy(user.get().getName().getFname())
+						.refreshToken(refreshToken)
+						.username(user.get().getUsername())
+						.tokenExpriyTime((tokenTimeMiliSec /1000)/60)
+						.build();
+			
+			return (T) ResponseHandler.responseBuilder("LOGIN SUCCESS", HttpStatus.OK, jwtResponse);
+			
+		} catch (Exception e) {
+			return (T) ResponseHandler.errorResponseBuilder(Messages.SOMETHING_WENT_WRONG, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@Override
+	public UserDto addUser(UserDto userDto) {
 
 		LOGGER.info("UserservicesImpl::addUser == START");
+		
+		User dbUser = null;
 
-		User user = userRepository.findByEmail(userDto.getEmail());
-
+		Optional<User> user = userRepository.findByEmail(userDto.getEmail());
+		
+		
 		LOGGER.info("UserservicesImpl::addUser::user by ID = {}", user);
-		if (user != null) {
+		if (user.isPresent()) {
 
 			LOGGER.info("UserservicesImpl::addUser::if user not null = {}", user);
 			throw new RuntimeException("user already exist with email " + userDto.getEmail());
 		}
 
-		user = dtoToModel(userDto);
-		for (UserRole userRole : roles) {
-			UserRole role = roleRepository.save(userRole);
-			user.getRoles().add(role);
-		}
+		UserRole ROLE = new UserRole(101, "CUSTOMER");
+		
+		dbUser = dtoToModel(userDto);
+			UserRole role = roleRepository.save(ROLE);
+			dbUser.setRole(role);
+
 
 		// user save
 		LOGGER.info("UserservicesImpl::addUser::UserDto to User Conversion = {}", user);
-		user = userRepository.save(user);
+		dbUser = userRepository.save(dbUser);
 
 		LOGGER.info("UserservicesImpl::addUser::converting addressDto to address");
 		List<Address> addresses = userDto.getAddress().stream().map(adDto -> modelMapper.map(adDto, Address.class))
@@ -76,16 +138,16 @@ public class UserServiesImpl<T> implements UserServices<T> {
 		// adding user id to address
 		LOGGER.info("UserservicesImpl::addUser::setting userId to address");
 		for (Address address : addresses) {
-			address.setUser(user);
+			address.setUser(dbUser);
 			address = addressRepository.save(address);
-			user.getAddress().add(address);
+			dbUser.getAddress().add(address);
 		}
 
-		userRepository.save(user);
+		userRepository.save(dbUser);
 		LOGGER.info("UserservicesImpl::addUser::User after getting saved = {}", user);
 
 		LOGGER.info("UserservicesImpl::addUser == END");
-		return modelToDto(user);
+		return modelToDto(dbUser);
 	}
 
 	@Override
@@ -215,5 +277,7 @@ public class UserServiesImpl<T> implements UserServices<T> {
 		}
 		return userDto;
 	}
+
+	
 
 }
